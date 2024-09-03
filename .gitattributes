@@ -1,2 +1,199 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+// ANSI Escape Codes for simple GUI
+#define RESET "\033[0m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN "\033[36m"
+#define BOLD "\033[1m"
+#define CLEAR_SCREEN "\033[2J\033[H"
+
+// Staff Class
+class Staff {
+    string name;
+    string position;
+    int qualification;
+    int workingHours;
+    float pay;
+public:
+    void setDetails(string n, string p, int q, int wh, float py) {
+        name = n;
+        position = p;
+        qualification = q;
+        workingHours = wh;
+        pay = py;
+    }
+
+    void showDetails() {
+        cout << BOLD << YELLOW << "Name: " << RESET << name << endl;
+        cout << BOLD << YELLOW << "Position: " << RESET << position << endl;
+        cout << BOLD << YELLOW << "Qualification: " << RESET << qualification << endl;
+        cout << BOLD << YELLOW << "Working Hours: " << RESET << workingHours << endl;
+        cout << BOLD << YELLOW << "Pay: " << RESET << pay << endl;
+    }
+};
+
+// Base User Class
+class User {
+protected:
+    string username;
+    string password;
+public:
+    virtual void menu() = 0; // Pure virtual function for user-specific menu
+};
+
+// Manager Class
+class Manager : public User {
+    vector<Staff> staffList;
+public:
+    Manager(string uname, string pwd) {
+        username = uname;
+        password = pwd;
+    }
+
+    void addStaff() {
+        Staff s;
+        string name, position;
+        int qualification, workingHours;
+        float pay;
+        cout << BOLD << GREEN << "Enter Staff Details:" << RESET << endl;
+        cout << "Name: "; cin >> name;
+        cout << "Position: "; cin >> position;
+        cout << "Qualification: "; cin >> qualification;
+        cout << "Working Hours: "; cin >> workingHours;
+        cout << "Pay: "; cin >> pay;
+        s.setDetails(name, position, qualification, workingHours, pay);
+        staffList.push_back(s);
+    }
+
+    void showAllStaff() {
+        cout << BOLD << BLUE << "Staff Details:" << RESET << endl;
+        for (auto& s : staffList) {
+            s.showDetails();
+            cout << "------------------" << endl;
+        }
+    }
+
+    void menu() override {
+        int choice;
+        while (true) {
+            cout << CLEAR_SCREEN;
+            cout << BOLD << CYAN << "Manager Menu:" << RESET << endl;
+            cout << "1. Add Staff" << endl;
+            cout << "2. Show All Staff" << endl;
+            cout << "3. Exit" << endl;
+            cout << "Enter your choice: "; cin >> choice;
+            switch (choice) {
+            case 1: addStaff(); break;
+            case 2: showAllStaff(); break;
+            case 3: return;
+            default: cout << RED << "Invalid choice!" << RESET << endl;
+            }
+        }
+    }
+};
+
+// Receptionist Class
+class Receptionist : public User {
+public:
+    Receptionist(string uname, string pwd) {
+        username = uname;
+        password = pwd;
+    }
+
+    void makeReservation() {
+        string name;
+        int tableNo;
+        cout << "Enter Customer Name: "; cin >> name;
+        cout << "Enter Table Number: "; cin >> tableNo;
+        ofstream file("reservations.txt", ios::app);
+        file << name << " reserved Table " << tableNo << endl;
+        file.close();
+        cout << GREEN << "Reservation successful!" << RESET << endl;
+    }
+
+    void menu() override {
+        int choice;
+        while (true) {
+            cout << CLEAR_SCREEN;
+            cout << BOLD << CYAN << "Receptionist Menu:" << RESET << endl;
+            cout << "1. Make Reservation" << endl;
+            cout << "2. Exit" << endl;
+            cout << "Enter your choice: "; cin >> choice;
+            switch (choice) {
+            case 1: makeReservation(); break;
+            case 2: return;
+            default: cout << RED << "Invalid choice!" << RESET << endl;
+            }
+        }
+    }
+};
+
+// Chef Class
+class Chef : public User {
+public:
+    Chef(string uname, string pwd) {
+        username = uname;
+        password = pwd;
+    }
+
+    void takeOrder() {
+        string dish;
+        int tableNo;
+        cout << "Enter Table Number: "; cin >> tableNo;
+        cout << "Enter Dish Ordered: "; cin >> dish;
+        ofstream file("orders.txt", ios::app);
+        file << "Table " << tableNo << " ordered " << dish << endl;
+        file.close();
+        cout << GREEN << "Order noted!" << RESET << endl;
+    }
+
+    void menu() override {
+        int choice;
+        while (true) {
+            cout << CLEAR_SCREEN;
+            cout << BOLD << CYAN << "Chef Menu:" << RESET << endl;
+            cout << "1. Take Order" << endl;
+            cout << "2. Exit" << endl;
+            cout << "Enter your choice: "; cin >> choice;
+            switch (choice) {
+            case 1: takeOrder(); break;
+            case 2: return;
+            default: cout << RED << "Invalid choice!" << RESET << endl;
+            }
+        }
+    }
+};
+
+// Main function
+int main() {
+    Manager mgr("manager", "manager123");
+    Receptionist rec("reception", "reception123");
+    Chef chef("chef", "chef123");
+
+    int role;
+    cout << CLEAR_SCREEN;
+    cout << BOLD << YELLOW << "Welcome to the Restaurant Management System" << RESET << endl;
+    cout << "Login as: " << endl;
+    cout << "1. Manager" << endl;
+    cout << "2. Receptionist" << endl;
+    cout << "3. Chef" << endl;
+    cout << "Enter your role: "; cin >> role;
+
+    switch (role) {
+    case 1: mgr.menu(); break;
+    case 2: rec.menu(); break;
+    case 3: chef.menu(); break;
+    default: cout << RED << "Invalid role!" << RESET << endl;
+    }
+
+    return 0;
+}
